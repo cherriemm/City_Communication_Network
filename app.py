@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify
-import networkx as nx
+from mst import kruskal_mst
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
@@ -9,11 +10,12 @@ def index():
 
 @app.route('/calculate', methods=['POST'])
 def calculate_mst():
-    data = request.json
-    G = nx.Graph()
-    G.add_weighted_edges_from(data['edges'])  # 传入边的数据
-    mst = nx.minimum_spanning_tree(G)
-    mst_edges = list(mst.edges(data=True))
+    data = request.get_json()
+    edges = data.get('edges')
+    v = data.get('V')
+    print(v)
+    print(edges)
+    mst_edges = kruskal_mst(v, edges)  # 你需要实现这个函数
     return jsonify(mst_edges)
 
 if __name__ == '__main__':

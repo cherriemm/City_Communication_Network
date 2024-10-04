@@ -7,9 +7,12 @@
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </head>
 <body>
-    <canvas id="canvas" width="800" height="600"></canvas>
+    <canvas id="cityNetwork" width="800" height="600"></canvas>
     <button id="calculate">Calculate MST</button>
-    <button id="add">Add a new City</button>
+    <button id="add" data-selected="false">Add City</button>
+    <button id="connect" data-selected="false">Connect Cities</button>
+    <button id="weight" data-selected="false">Modify Cost between Cities</button>
+    <button id="clear">Clear</button>
 
 </body>
 </html>
