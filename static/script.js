@@ -10,9 +10,19 @@ var modify_city_name = false;
 var firstNode = null;
 var secondNode = null;
 
+function getMousePos(canvas, event) {
+    var rect = canvas.getBoundingClientRect();
+    return {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top
+    };
+}
+
 function AddCity(event) {
-    var x = event.offsetX;
-    var y = event.offsetY;
+    var canvas = document.getElementById('cityNetwork');
+    var pos = getMousePos(canvas, event);
+    var x = pos.x;
+    var y = pos.y;
     var id = nodes.length + 1;
     nodes.push({x, y, id});
     console.log(id);
@@ -20,21 +30,28 @@ function AddCity(event) {
 }
 
 function AddEdge(event) {
+    var canvas = document.getElementById('cityNetwork');
+    var pos = getMousePos(canvas, event);
     var clickedNode = null;
     for (let i = 0; i < nodes.length; i++) {
         let node = nodes[i];
-        let dx = event.offsetX - node.x;
-        let dy = event.offsetY - node.y;
+        let dx = pos.x - node.x;
+        let dy = pos.y - node.y;
         if (dx * dx + dy * dy <= r * r) {
             clickedNode = node;
             break;
         }
     }
-    if(clickedNode !== null) {
+    if (clickedNode !== null) {
         if (firstNode === null) {
             firstNode = clickedNode;
-            } else {
+        } else {
             secondNode = clickedNode;
+            if (secondNode === firstNode) {
+                firstNode = null;
+                secondNode = null;
+                return;
+            }
             edges.push({firstNode, secondNode});
             firstNode = null;
             secondNode = null;
@@ -52,30 +69,29 @@ function in_circle(event) {
             return true;
         }
     }
-
     return false;
 }
 
 function AddWeight(event) {
+    var canvas = document.getElementById('cityNetwork');
+    var pos = getMousePos(canvas, event);
     var clickedEdge = null;
     if (in_circle(event)) return;
     for (let i = 0; i < edges.length; i++) {
         let edge = edges[i];
         let x1 = edge.firstNode.x, x2 = edge.secondNode.x;
         let y1 = edge.firstNode.y, y2 = edge.secondNode.y;
-        let x0 = event.offsetX, y0 = event.offsetY;
         
-        let A = y2-y1, B = x1-x2, C = x2*y1 - x1*y2;
-        let distance = Math.abs(A * x0 + B * y0 + C) / Math.sqrt(A * A + B * B);
+        let A = y2 - y1, B = x1 - x2, C = x2 * y1 - x1 * y2;
+        let distance = Math.abs(A * pos.x + B * pos.y + C) / Math.sqrt(A * A + B * B);
 
-        if(distance <= 5)
-        {
+        if (distance <= 10) {
             clickedEdge = edge;
             break;
         }
     }
     var weight = prompt('请输入边的权重');
-    if (weight!== null) {
+    if (weight !== null && clickedEdge !== null) {
         clickedEdge.weight = parseInt(weight);
         draw();
     }
@@ -193,12 +209,18 @@ function draw() {
     }
 }
 
-function SendData() {
+function formatting_graph() {
     edge_formatting = [];
     for(let i = 0; i < edges.length; i++) {
         let edge = edges[i];
-        edge_formatting.push(edge.firstNode.id, edge.secondNode.id, edge.weight);
+        edge_formatting.push([edge.firstNode.id, edge.secondNode.id, edge.weight]);
     }
+    return edge_formatting;
+}
+
+
+function SendData() {
+    var edge_formatting = formatting_graph();
     fetch('/calculate', {
         method: 'POST',
         headers: {
@@ -219,8 +241,46 @@ function SendData() {
 }
 
 
+function storeGraph() {
+    console.log(nodes);
+    console.log(edges);
+    var graphName = document.getElementById('graphName').value;
+    var graphDescription = document.getElementById('graphDescription').value;
+    fetch('/save_to_database', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json', 
+        },
+        body: JSON.stringify({
+        edges : edges,
+        nodes : nodes,
+        graphName: graphName,
+        graphDescription: graphDescription
+        }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+function LoadGraph() {
+
+}
+
 window.onload = function() {
     setupCanvasEvents();
     document.getElementById("calculate").onclick = SendData;
+    document.getElementById("store").onclick = function(event) {
+        $('#storeModal').modal('show');
+    };
+    document.getElementById("load").onclick = LoadGraph;
+    document.getElementById('submit').addEventListener('click', function (event) {
+        storeGraph();
+        $('#storeModal').modal('hide');
+    });
 }
 

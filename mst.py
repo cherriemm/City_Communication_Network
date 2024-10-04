@@ -1,10 +1,4 @@
 
-class Edge:
-    def __init__(self, l, r, val):
-        self.l = l
-        self.r = r
-        self.val = val
-
 """Disjoint set union for kruskal algorithm"""
 class Dsu:
 
@@ -31,21 +25,37 @@ class Dsu:
         self.parent[u] = v
 
 
+def transformEdge(edges):
+    new_edges = []
+    for edge in edges:
+        new_edge = {
+            'l': edge[0],
+            'r': edge[1],
+            'val': edge[2]
+        }
+        new_edges.append(new_edge)
+    return new_edges
+
 def kruskal_mst(V, edges):
     forest = Dsu(V)
     mst = []
     cost = 0
 
-    edges = sorted(edges, key=lambda edge: edge.val)
+    edges = sorted(edges, key=lambda edge: edge['val'])
     for edge in edges:
-        l = edge.l
-        r = edge.r
+        l = edge['l']
+        r = edge['r']
         if not forest.is_same(l, r):
             forest.join(l, r)
             mst.append(edge)
-            cost += edge.val
+            cost += edge['val']
 
     return mst, cost
+
+
+def prim_mst():
+    pass
+
 
 
 
@@ -65,9 +75,11 @@ if __name__ == "__main__" :
         [6, 7, 1]
     ]
 
-    e = [Edge(row[0], row[1], row[2]) for row in data]
+    e = transformEdge(data)
 
     path, c = kruskal_mst(V, e)
+    for p in path:
+        print(p)
     print(c)
 
 

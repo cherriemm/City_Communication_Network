@@ -1,3 +1,33 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
 canvas {
-	border: 1px solid black;
+	border: 2px solid #333;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%; /* 100% 宽度 */
+    height: auto; /* 高度自动调整以保持比例 */
+    max-width: 800px; /* 最大宽度 */
+    max-height: 600px; /* 最大高度 */
+    object-fit: contain; /* 保持宽高比 */
+    display: block; /* 确保画布是块级元素 */
+    margin-right: 20px; /* 右侧间距 */
+}
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end; /* 右对齐按钮 */
+    margin-left: 20px; /* 左边距 */
+}
+
+.btn-custom {
+    width: 150px; /* 统一按钮宽度 */
+    margin-bottom: 10px; /* 按钮之间的间距 */
+}
+
+.btn-danger {
+    background-color: #dc3545; /* 红色 */
+    color: white;
 }
